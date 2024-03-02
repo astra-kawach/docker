@@ -10,6 +10,16 @@
 `docker build --no-cache -t php81-alpine:latest -f Dockerfile_php81_alpine .
 `
 
+## Create PHP 8.3.3 Alpine latest image
+`docker build --no-cache -t php83-alpine:latest -f Dockerfile_php83_alpine .`
+
+
+## Tag a build for ECR
+`docker tag php83-alpine xxxxxxxxxxxxxxxxx.dkr.ecr.us-west-2.amazonaws.com/php83-fpm-alpine`
+
+## Push Docker image to ECR
+`docker push xxxxxxxxxxxxxxxxx.dkr.ecr.us-west-2.amazonaws.com/php83-fpm-alpine`
+
 ## Create NGINX latest image
 `docker build --no-cache -t nginx-local:latest -f Dockerfile_nginx .
 `

@@ -1,0 +1,48 @@
+# Start from the official PHP 8.3.3 FPM Alpine image
+FROM php:8.3.3-fpm-alpine
+
+# Update and upgrade Alpine packages
+RUN apk update && apk upgrade
+
+# Install dependencies for the application and PHP extensions
+RUN apk add --no-cache \
+    unzip nginx supervisor curl bash \
+    zip libpng libpng-dev libwebp-dev libzip-dev \
+    postgresql-dev # For pdo_pgsql and pgsql extensions
+
+# Install build dependencies for compiling PHP extensions and cleanup after
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS linux-headers \
+    && docker-php-ext-install pdo pdo_pgsql pgsql pcntl exif pdo_mysql opcache sockets zip \
+    && apk del -f .build-deps
+
+# Set recommended PHP.ini settings
+# Note: You may adjust these settings based on your specific needs
+RUN { \
+        echo "opcache.enable_cli=1"; \
+        echo "memory_limit=512M"; \
+        echo "upload_max_filesize=100M"; \
+        echo "post_max_size=100M"; \
+    } > /usr/local/etc/php/conf.d/docker-php-recommended.ini
+
+# Install Composer globally
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Create directories for Nginx and supervisor
+RUN mkdir -p /run/nginx && \
+    mkdir -p /var/log/supervisor
+
+# Set up Nginx
+COPY confs/nginx.conf /etc/nginx/nginx.conf
+COPY confs/default.conf /etc/nginx/conf.d/default.conf
+
+# Set up Supervisor
+COPY confs/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Set the working directory to /var/www/html
+WORKDIR /var/www/html
+
+# Expose ports 80 and 443 for Nginx
+EXPOSE 80 443
+
+# Start Supervisor to manage Nginx and PHP-FPM processes
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
