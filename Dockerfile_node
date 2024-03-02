@@ -1,0 +1,8 @@
+FROM node:alpine
+
+# Install Angular CLI and latest npm
+RUN npm install -g @angular/cli@latest npm@latest
+
+# Expose port 4200 for the Angular app
+EXPOSE 4200
+

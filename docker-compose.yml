@@ -1,0 +1,23 @@
+services:
+    db:
+        container_name: db
+        image: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: siddhant
+        ports:
+            - 3306:3306
+        volumes:
+            - ./db-data:/var/lib/mysql
+    
+    testpro:
+        container_name: testing
+        build:
+            context: ./TestDocker
+            dockerfile: build/Dockerfile.local
+        ports:
+            - 9001:80
+        volumes:
+            - ./TestDocker:/var/www
+        depends_on:
+            - db
+        
